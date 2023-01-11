@@ -26,6 +26,23 @@ def test_get_assignments_teacher_2(client, h_teacher_2):
         assert assignment['state'] == 'SUBMITTED'
 
 
+def test_get_assignments_non_existent_teacher(client, h_teacher_non_existent):
+    response = client.get(
+        '/teacher/assignments',
+        headers=h_teacher_non_existent
+    )
+
+    assert response.status_code == 200
+
+
+def test_get_assignments_for_none_teacher(client, h_invalid):
+    response = client.get(
+        '/teacher/assignments',
+        headers=h_invalid
+    )
+    assert response.status_code == 403
+
+
 def test_grade_assignment_cross(client, h_teacher_2):
     """
     failure case: assignment 1 was submitted to teacher 1 and not teacher 2
@@ -43,6 +60,20 @@ def test_grade_assignment_cross(client, h_teacher_2):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+def test_grade_assignment(client, h_teacher_1):
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1,
+        json={
+            "id": 1,
+            "grade": "A"
+        }
+    )
+
+    assert response.status_code == 200
+    data = response.json['data']
+    assert data['state'] == 'GRADED'
 
 
 def test_grade_assignment_bad_grade(client, h_teacher_1):
@@ -100,3 +131,34 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+
+def test_grade_assignment_invalid_method(client, h_teacher_1):
+    """
+    failure case: only a submitted assignment can be graded
+    """
+    response = client.get(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1
+        , json={
+            "id": 2,
+            "grade": "A"
+        }
+    )
+
+    assert response.status_code == 405
+
+
+def test_grade_assignment_grade_missing(client, h_teacher_1):
+    """
+    failure case: grade missing in params
+    """
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1
+        , json={
+            "id": 2
+        }
+    )
+
+    assert response.status_code == 400

@@ -71,3 +71,39 @@ def test_assingment_resubmitt_error(client, h_student_1):
     assert response.status_code == 400
     assert error_response['error'] == 'FyleError'
     assert error_response["message"] == 'only a draft assignment can be submitted'
+
+def test_no_headers(client):
+    response = client.post(
+        '/student/assignments/submit',
+        headers=None,
+        json={
+            'id': 2,
+            'teacher_id': 2
+        })
+    assert response.status_code == 401
+
+def test_submit_assignment_invalid_method(client, h_student_1):
+    """
+    failure case: only a submitted assignment can be graded
+    """
+    response = client.get(
+        '/student/assignments/submit',
+        headers=h_student_1
+        , json={
+            'id': 2,
+            'teacher_id': 2
+        }
+    )
+
+    assert response.status_code == 405
+
+
+def test_invalid_headers(client, h_invalid):
+    response = client.post(
+        '/student/assignments/submit',
+        headers=h_invalid,
+        json={
+            'id': 2,
+            'teacher_id': 2
+        })
+    assert response.status_code == 403

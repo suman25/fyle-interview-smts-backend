@@ -54,3 +54,21 @@ def h_teacher_2():
     }
 
     return headers
+
+@pytest.fixture
+def h_invalid():
+    headers = {
+        'X-Principal': json.dumps({
+            'user_id': 90866757
+        })
+    }
+    return headers
+@pytest.fixture()
+def h_teacher_non_existent():
+    headers = {
+        'X-Principal': json.dumps({
+            'teacher_id': 89787,
+            'user_id': 90866757
+        })
+    }
+    return headers

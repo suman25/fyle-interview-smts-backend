@@ -2,6 +2,7 @@ from flask import jsonify
 from marshmallow.exceptions import ValidationError
 from core import app
 from core.apis.assignments import student_assignments_resources
+from core.apis.assignments import teacher_assignments_resources
 from core.libs import helpers
 from core.libs.exceptions import FyleError
 from werkzeug.exceptions import HTTPException
@@ -9,6 +10,7 @@ from werkzeug.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 
 app.register_blueprint(student_assignments_resources, url_prefix='/student')
+app.register_blueprint(teacher_assignments_resources, url_prefix='/teacher')
 
 
 @app.route('/')
@@ -41,3 +43,6 @@ def handle_error(err):
         ), err.code
 
     raise err
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port= 5000, debug= True)
